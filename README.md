@@ -8,9 +8,9 @@
 
   * Os dados gerais juntam os dados para as eleições municipais e estaduais/nacionais. No segundo caso, é possível que apenas um dos cargos de governador ou presidente estivessem em votação, mas essa situação foi agregada aqui. 
   
-  * É possível também separar a visualização para as eleições municipais e estaduais/nacionais no gráfico abaixo
+  * É possível também separar a visualização para as eleições municipais e estaduais/nacionais no gráfico do HTML
   
-  * A linha vertical preta se refere à marcaçaõ das manifestações de 2013
+  * A linha vertical preta se refere à marcação das manifestações de 2013
 
 * Os dados para a 2a visualização foram obtidos da [Base dos Dados](https://basedosdados.org/dataset/br-tse-eleicoes)
   
