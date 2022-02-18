@@ -1,6 +1,6 @@
 # Assignment_2
 
-* Há um HTML como output do código do RMD
+* Há um HTML como output do código do RMD, porém como o github não permite a leitura direta de html há um .rar contendo o html que pode ser aberto normalmente
 
  * As PNGs foram geradas dentro do R após o plot dos gráficos
 
