@@ -1,0 +1,154 @@
+---
+title: "Assignment 2"
+author: "Bernardo Duque"
+date: "17/02/2022"
+output: 
+  html_document:
+      toc: true
+      toc_float: true
+      number_sections: true
+---
+
+```{r setup, include=FALSE,echo=FALSE}
+setwd("C://Users//duque//Desktop//PUC//Mestrado//Verão 1//Estatística//Data Science//Trab 2")
+
+# Carregando os pacotes que serão utilizados
+
+library(tidyr)
+library(dplyr)
+library(basedosdados)
+library(readxl)
+library(highcharter)
+```
+
+# Comparecimento às Urnas
+
+<font size="4"> 
+
+* Os dados foram obtidos da [Base dos Dados](https://basedosdados.org/dataset/br-tse-eleicoes#acesso)
+
+  * Os dados gerais juntam os dados para as eleições municipais e estaduais/nacionais. No segundo caso, é possível que apenas um dos cargos de governador ou presidente estivessem em votação, mas essa situação foi agregada aqui. 
+  
+  * É possível também separar a visualização para as eleições municipais e estaduais/nacionais no gráfico abaixo
+  
+  * A linha vertical preta se refere à marcaçaõ das manifestações de 2013
+
+</font> 
+
+```{r, echo=FALSE}
+# Importando a base
+
+df <- read.csv("detalhes_votacao_municipio.csv")
+
+# Filtrando para municipio do Rio, cargos e variável de interesse
+
+df <- df %>% 
+  filter(id_municipio == 3304557,
+          cargo %in% c("prefeito","governador","presidente")) %>%
+  select(ano,turno,cargo,proporcao_comparecimento)
+
+# rodando um for para gerar criar dfs com dados gerais e segregados por eleicoes municipais e estaduais/nacionais
+
+for (i in c(1,2)) {
+  
+  # prefeito
+  
+  aux <- df %>%
+    filter(cargo=="prefeito",
+           turno==i)
+  assign(paste0("prefeito_",i),aux)
+  
+  # governador/presidente
+  
+  aux <- df %>%
+    filter(cargo %in% c("governador","presidente"),
+           turno==i)
+  aux <- aux[duplicated(aux[,"ano"])==F,]
+  assign(paste0("governador_",i),aux)
+  
+  # geral
+  
+  aux <- df %>%
+    filter(turno==i) %>%
+    select(ano,proporcao_comparecimento)
+
+  aux <- aux[duplicated(aux[,"ano"])==F,]
+
+  assign(paste0("total_",i),aux)
+  
+}
+```
+
+```{r,echo=FALSE}
+
+# plotando o gráfico
+
+highchart() %>%
+  hc_add_series(data=total_1,type = 'line', hcaes(x = 'ano', y = 'proporcao_comparecimento'),name="Geral - 1o turno",color="cornflowerblue") %>%
+  hc_add_series(data=total_2,type = 'line', hcaes(x = 'ano', y = 'proporcao_comparecimento'),name="Geral - 2o turno",color=hex_to_rgba("darkblue")) %>%
+  hc_add_series(data=prefeito_1,type = 'line', hcaes(x = 'ano', y = 'proporcao_comparecimento'),name="Prefeito - 1o turno",color="orange", visible =F) %>%
+  hc_add_series(data=governador_1,type = 'line', hcaes(x = 'ano', y = 'proporcao_comparecimento'),name="Presidente/Governador - 1o turno",color="red", visible =F) %>%
+  hc_add_series(data=prefeito_2,type = 'line', hcaes(x = 'ano', y = 'proporcao_comparecimento'),name="Prefeito - 2o turno",color="orangered",visible = F) %>%
+  hc_add_series(data=governador_2,type = 'line', hcaes(x = 'ano', y = 'proporcao_comparecimento'),name="Presidente/Governador - 2o turno",color="darkred", visible =F) %>%
+  hc_xAxis(type = "lines",plotLines = list(
+    list(
+      color = "black",
+      width = 4,
+      value = 2013
+    ))) %>%
+  hc_title(
+    text = "<b>Gráfico 1 - Evolução do Comparecimento nas Eleições no Município do Rio de Janeiro (em %) - 1998-2020</b>",
+    margin = 20,
+    align = "center",
+    style = list(color = "dark blue", useHTML = TRUE)
+  )
+```
+
+# Governadores por Partido 
+
+* Os dados foram obtidos da [Base dos Dados](https://basedosdados.org/dataset/br-tse-eleicoes)
+  
+  * Dados para 25 estados
+  
+
+```{r, echo=F}
+
+# limpando o environment
+
+rm(list = ls())
+
+# importando a nova base
+
+df <- read.csv("resultados_candidato_municipio.csv")
+
+df <- df %>%
+  filter(cargo == "governador",
+         resultado=="eleito", 
+         ano==2018) %>%
+  select(ano,sigla_uf,sigla_partido)
+
+# removendo linhas repetidas
+
+df <- df[duplicated(df[,"sigla_uf"])==F,]
+
+# contando numero de partidos
+
+df_2 <- df %>% 
+  count(sigla_partido) %>%
+  arrange(desc(n))
+```
+
+```{r, echo = F}
+
+#hchart(df_2,type="column",hcaes(x="sigla_partido",y="n",group="sigla_partido"),dataLabels = list(enabled = T)) %>%
+hchart(df_2,type="column",hcaes(x="sigla_partido",y="n"),dataLabels = list(enabled = T),color="#cc0000") %>%
+  #hc_colors(colors=c("#cc0000","grey","brown","blue","yellow","green","orange","lightblue","orangered","firebrick","#993399","darkblue")) %>%
+  hc_title(
+    text = "<b>Número de Estados com Governadores por Partido em 2018</b>",
+    margin = 20,
+    align = "center",
+    style = list(color = "dark blue", useHTML = TRUE)
+  )
+
+```
+
